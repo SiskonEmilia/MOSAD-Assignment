@@ -24,6 +24,8 @@ namespace InternetApplication
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public static bool musicOn = false;
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -61,11 +63,17 @@ namespace InternetApplication
                     if (ContentFrame.CurrentSourcePageType != typeof(QueryPage))
                         ContentFrame.Navigate(typeof(QueryPage));
                     break;
+                case "Music Player":
+                    break;
                 default:
                     break;
             }
         }
 
-        
+        public void TurnOnMusicFunction()
+        {
+            NavView.MenuItems.Add(new NavigationViewItem()
+            { Content = "Music Player", Icon = new SymbolIcon(Symbol.MusicInfo), Tag = "Music Player" });
+        }
     }
 }

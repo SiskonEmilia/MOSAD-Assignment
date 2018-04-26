@@ -27,6 +27,7 @@ namespace InternetApplication
     public sealed partial class QueryPage : Page
     {
         private ViewModel viewmodel;
+        private static bool doParse = true;
 
         public QueryPage()
         {
@@ -48,22 +49,39 @@ namespace InternetApplication
                 if (enter.HasFlag(CoreVirtualKeyStates.Down))
                 {
                     CheckMessage();
+                    MyScrollViewer.UpdateLayout();
+                    MyScrollViewer.ChangeView(null,double.MaxValue, null);
                 }
             }
         }
 
         private void CheckMessage()
         {
-            if (TypingArea.Text == "")
+            switch (TypingArea.Text)
             {
-                NotifyUser("You cannot send an empty message.");
-                return;
+                case "":
+                    NotifyUser("You cannot send an empty message.");
+                    return;
+                case "关闭解析":
+                    viewmodel.AddSelf(TypingArea.Text);
+                    TypingArea.Text = "";
+                    viewmodel.AddEmilia("XML解析已关闭。读不懂的话就别勉强了。");
+                    doParse = false;
+                    return;
+                case "开启解析":
+                    viewmodel.AddSelf(TypingArea.Text);
+                    TypingArea.Text = "";
+                    viewmodel.AddEmilia("XML解析已开启。回到人类语言的感觉如何？");
+                    doParse = true;
+                    return;
+                default:
+                    break;
             }
             string message = string.Copy(TypingArea.Text);
             TypingArea.Text = "";
             viewmodel.AddSelf(message);
             MyScrollViewer.UpdateLayout();
-            MyScrollViewer.ChangeView(null, MyScrollViewer.VerticalOffset, null);
+            MyScrollViewer.ChangeView(null,double.MaxValue, null);
             SendMessage(message);
         }
 
@@ -97,20 +115,27 @@ namespace InternetApplication
                 body = "Error: " + ex.HResult.ToString("X") + " Message: " + ex.Message;
             }
 
-            ResponsXML.SetSource(body);
             string result = "";
-            if (ResponsXML.GetField("status") == "success")
+            if (doParse)
             {
-                result += "IP 地址：" + ResponsXML.GetField("query") +
-                    "\n国家：" + ResponsXML.GetField("country") +
-                    "\n地区：" + ResponsXML.GetField("regionName") +
-                    "\n城市：" + ResponsXML.GetField("city") +
-                    "\n时区：" + ResponsXML.GetField("timezone") +
-                    "\n服务提供商：" + ResponsXML.GetField("isp");
+                ResponsXML.SetSource(body);
+                if (ResponsXML.GetField("status") == "success")
+                {
+                    result += "IP 地址：" + ResponsXML.GetField("query") +
+                        "\n国家：" + ResponsXML.GetField("country") +
+                        "\n地区：" + ResponsXML.GetField("regionName") +
+                        "\n城市：" + ResponsXML.GetField("city") +
+                        "\n时区：" + ResponsXML.GetField("timezone") +
+                        "\n服务提供商：" + ResponsXML.GetField("isp");
+                }
+                else
+                {
+                    result = "请检查您输入的 IP 地址，他似乎不合法或不支持查询";
+                }
             }
             else
             {
-                result = "请检查您输入的 IP 地址，他似乎不合法或不支持查询";
+                result = body;
             }
 
             viewmodel.AddEmilia(result);

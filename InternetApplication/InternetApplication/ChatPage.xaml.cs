@@ -28,6 +28,8 @@ namespace InternetApplication
     public sealed partial class ChatPage : Page
     {
         private ViewModel viewmodel;
+        private static bool doParse = true;
+
         public ChatPage()
         {
             this.InitializeComponent();
@@ -47,22 +49,39 @@ namespace InternetApplication
                 if (enter.HasFlag(CoreVirtualKeyStates.Down))
                 {
                     CheckMessage();
+                    MyScrollViewer.UpdateLayout();
+                    MyScrollViewer.ChangeView(null,double.MaxValue, null);
                 }
             }
         }
 
         private void CheckMessage()
         {
-            if (TypingArea.Text == "")
+            switch (TypingArea.Text)
             {
-                NotifyUser("You cannot send an empty message.");
-                return;
+                case "":
+                    NotifyUser("You cannot send an empty message.");
+                    return;
+                case "关闭解析":
+                    viewmodel.AddSelf(TypingArea.Text);
+                    TypingArea.Text = "";
+                    viewmodel.AddEmilia("好的，JSON解析已关闭。不过这样哥哥还能看懂我说话吗？");
+                    doParse = false;
+                    return;
+                case "开启解析":
+                    viewmodel.AddSelf(TypingArea.Text);
+                    TypingArea.Text = "";
+                    viewmodel.AddEmilia("好的，JSON解析已开启。不过人类的语言用着有些别扭呢=v=");
+                    doParse = true;
+                    return;
+                default:
+                    break;
             }
             string message = string.Copy(TypingArea.Text);
             TypingArea.Text = "";
             viewmodel.AddSelf(message);
             MyScrollViewer.UpdateLayout();
-            MyScrollViewer.ChangeView(null, MyScrollViewer.VerticalOffset, null);
+            MyScrollViewer.ChangeView(null,double.MaxValue, null);
             SendMessage(message);
         }
 
@@ -85,12 +104,21 @@ namespace InternetApplication
                 body = "Error: " + ex.HResult.ToString("X") + " Message: " + ex.Message;
             }
 
-            RequestJSON.SetSource(body);
-            var jsonurl = RequestJSON.GetURL();
-            var text = RequestJSON.GetText();
-            if (jsonurl != "")
+            string text = "";
+
+            if (doParse)
             {
-                text += "\n" + jsonurl;
+                RequestJSON.SetSource(body);
+                var jsonurl = RequestJSON.GetURL();
+                text = RequestJSON.GetText();
+                if (jsonurl != "")
+                {
+                    text += "\n" + jsonurl;
+                }
+            }
+            else
+            {
+                text = body;
             }
 
             viewmodel.AddEmilia(text);

@@ -25,10 +25,12 @@ namespace InternetApplication
     public sealed partial class MainPage : Page
     {
         public static bool musicOn = false;
+        public static MainPage current;
 
         public MainPage()
         {
             this.InitializeComponent();
+            current = this;
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
             Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TitleBar.ButtonBackgroundColor = Color.FromArgb(0, 0, 0, 0);
         }
@@ -41,6 +43,13 @@ namespace InternetApplication
             { Content = "Chat Robot", Icon = new SymbolIcon(Symbol.Character), Tag = "Chat Robot" });
             NavView.MenuItems.Add(new NavigationViewItem()
             { Content = "IP Query", Icon = new SymbolIcon(Symbol.Find), Tag = "IP Query" });
+
+            NavView.MenuItems.Add(new NavigationViewItemSeparator());
+            NavView.MenuItems.Add(new NavigationViewItemHeader()
+            { Content = "               Media" });
+            NavView.MenuItems.Add(new NavigationViewItem()
+            { Content = "Media Player", Icon = new SymbolIcon(Symbol.MusicInfo), Tag = "Media Player" });
+            MusicVM music = MusicVM.GetInstance();
         }
 
         private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -63,17 +72,14 @@ namespace InternetApplication
                     if (ContentFrame.CurrentSourcePageType != typeof(QueryPage))
                         ContentFrame.Navigate(typeof(QueryPage));
                     break;
-                case "Music Player":
+                case "Media Player":
+                    if (ContentFrame.CurrentSourcePageType != typeof(PlayerPage))
+                        ContentFrame.Navigate(typeof(PlayerPage));
                     break;
                 default:
                     break;
             }
         }
 
-        public void TurnOnMusicFunction()
-        {
-            NavView.MenuItems.Add(new NavigationViewItem()
-            { Content = "Music Player", Icon = new SymbolIcon(Symbol.MusicInfo), Tag = "Music Player" });
-        }
     }
 }

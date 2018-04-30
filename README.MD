@@ -11,3 +11,7 @@
 1. ChattingUWP Version-1.0
 
     存储在InternetApplication文件夹中。一个通过聊天形式查询所需信息的 UWP APP。
+
+在您使用本仓库代码前，请注意：**根据中山大学管理条例的相关规定，作弊者不授予学士学位。**
+
+Before you use codes in this repo, what I want to mention you is that: **According to the regulations of SYSU, cheaters will not be awarded a bachelor's degree.**

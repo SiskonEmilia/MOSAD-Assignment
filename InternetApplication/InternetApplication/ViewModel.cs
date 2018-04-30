@@ -37,7 +37,7 @@ namespace InternetApplication
                     {
                         Name = "Emilia",
                         Published = DateTime.Now,
-                        Comment = "你好！我是艾米莉娅~你可以向我随意提问哦。",
+                        Comment = "哥哥你好！我是艾米莉娅~你可以向我随意提问哦。",
                         IsSelf = false
                     });
                 }

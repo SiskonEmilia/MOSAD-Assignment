@@ -51,6 +51,9 @@
             </DataTemplate>
 
             <local:MessageItemDataTemplateSelector x:Key="MessageItemDataTemplateSelector" />
+
+            <Thickness x:Key="FlyoutContentThemePadding">0,0,0,0</Thickness>
+            <Thickness x:Key="FlyoutBorderThemeThickness">0</Thickness>
         </ResourceDictionary>
     </Application.Resources>
 

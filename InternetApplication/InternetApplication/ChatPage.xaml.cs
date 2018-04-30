@@ -28,11 +28,13 @@ namespace InternetApplication
     public sealed partial class ChatPage : Page
     {
         private ViewModel viewmodel;
+        public static ChatPage current;
         private static bool doParse = true;
 
         public ChatPage()
         {
             this.InitializeComponent();
+            current = this;
 
             this.DataContext = viewmodel = ViewModel.GetInstance();
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
@@ -74,15 +76,28 @@ namespace InternetApplication
                     viewmodel.AddEmilia("好的，JSON解析已开启。不过人类的语言用着有些别扭呢=v=");
                     doParse = true;
                     return;
+                case "放点音乐吧":
+                    viewmodel.AddSelf(TypingArea.Text);
+                    TypingArea.Text = "";
+                    viewmodel.AddEmilia("好的，那就来一首哥哥喜欢的 Dream It Possible 吧~");
+                    (Parent as Frame).Navigate(typeof(PlayerPage), 0);
+                    return;
                 default:
                     break;
             }
+
             string message = string.Copy(TypingArea.Text);
             TypingArea.Text = "";
             viewmodel.AddSelf(message);
             MyScrollViewer.UpdateLayout();
             MyScrollViewer.ChangeView(null,double.MaxValue, null);
             SendMessage(message);
+        }
+
+        public void ScrollToBottom()
+        {
+            MyScrollViewer.UpdateLayout();
+            MyScrollViewer.ChangeView(null, double.MaxValue, null);
         }
 
         private async void SendMessage(string message)

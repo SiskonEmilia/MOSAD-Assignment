@@ -155,7 +155,13 @@
                                                                     <SymbolIcon Symbol="Play"/>
                                                                 </Viewbox>
                                                             </Button>
-                                                            
+
+                                                            <Button Style="{x:Null}" Background="{x:Null}" x:Name="RemoveMusic" Click="RemoveMusic_Click" Tag="{x:Bind Title}">
+                                                                <Viewbox MaxHeight="24" MaxWidth="24">
+                                                                    <SymbolIcon Symbol="Cancel"/>
+                                                                </Viewbox>
+                                                            </Button>
+
                                                             <TextBlock Text="{x:Bind Title}" Margin="8" VerticalAlignment="Center" TextAlignment="Left" HorizontalAlignment="Center"/>
                                                             
                                                         </StackPanel>

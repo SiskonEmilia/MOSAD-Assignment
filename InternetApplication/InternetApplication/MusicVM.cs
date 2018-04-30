@@ -23,6 +23,7 @@ namespace InternetApplication
         public string Artist;
         public BitmapImage AlbumCover;
         public bool isMusic = true;
+        public StorageFile file;
     }
 
     public class MusicVM
@@ -95,6 +96,8 @@ namespace InternetApplication
             else
                 song.AlbumCover.UriSource = new Uri("ms-appx:///Assets/LockScreenLogo.scale-200.png");
 
+            song.file = file;
+
             musics.Add(song);
 
             var mediaSource = MediaSource.CreateFromStorageFile(file);
@@ -117,6 +120,8 @@ namespace InternetApplication
                 isMusic = false
             };
 
+            song.file = file;
+
             song.AlbumCover.UriSource = new Uri("ms-appx:///Assets/LockScreenLogo.scale-200.png");
             musics.Add(song);
 
@@ -131,6 +136,8 @@ namespace InternetApplication
         {
             var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Delacey - Dream It Possible.mp3"));
             AddMusic(file);
+            var file2 = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Nier.Mp4"));
+            AddVideo(file2);
         }
 
         // If the current item change, refresh the GUI
@@ -150,7 +157,7 @@ namespace InternetApplication
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 if (PlayerPage.Current != null)
-                    PlayerPage.Current.RefreshGUI(item.Title, item.Artist, item.AlbumCover, item.isMusic);
+                    PlayerPage.Current.RefreshGUI(item.Title, item.Artist, item.AlbumCover, item.isMusic, item.file);
             });
             
         }
@@ -185,6 +192,12 @@ namespace InternetApplication
         public void MovePrevious()
         {
             playbackList.MovePrevious();
+        }
+
+        public void Remove(int index)
+        {
+            playbackList.Items.RemoveAt(index);
+            musics.RemoveAt(index);
         }
     }
 }

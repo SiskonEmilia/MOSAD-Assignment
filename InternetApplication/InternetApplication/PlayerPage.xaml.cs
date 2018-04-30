@@ -9,6 +9,7 @@ using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Media;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
@@ -33,6 +34,7 @@ namespace InternetApplication
         MusicVM playlist = MusicVM.GetInstance();
         ObservableCollection<MusicPiece> Musics;
         public static PlayerPage Current;
+        SystemMediaTransportControls _systemMediaTransportControls;
 
         public PlayerPage()
         {
@@ -44,6 +46,49 @@ namespace InternetApplication
             Musics = playlist.GetMusics();
 
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
+
+            _systemMediaTransportControls = SystemMediaTransportControls.GetForCurrentView();
+            // Get current SMTC
+            _systemMediaTransportControls.IsPlayEnabled = true;
+            _systemMediaTransportControls.IsPauseEnabled = true;
+            _systemMediaTransportControls.IsPreviousEnabled = true;
+            _systemMediaTransportControls.IsNextEnabled = true;
+
+            _systemMediaTransportControls.ButtonPressed += SystemControls_ButtonPressed;
+            // Handle ButtonPressed Event
+        }
+
+        private async void SystemControls_ButtonPressed(SystemMediaTransportControls sender, SystemMediaTransportControlsButtonPressedEventArgs args)
+        {
+            switch (args.Button)
+            {
+                case SystemMediaTransportControlsButton.Play:
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        mediaPlayer.Play();
+                    });
+                    break;
+                case SystemMediaTransportControlsButton.Pause:
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        mediaPlayer.Pause();
+                    });
+                    break;
+                case SystemMediaTransportControlsButton.Previous:
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        playlist.MovePrevious();
+                    });
+                    break;
+                case SystemMediaTransportControlsButton.Next:
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        playlist.MoveNext();
+                    });
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void Dispatcher_AcceleratorKeyActivated(CoreDispatcher sender, AcceleratorKeyEventArgs args)
@@ -65,17 +110,28 @@ namespace InternetApplication
 
         private void MediaPlayer_CurrentStateChanged(object sender, RoutedEventArgs e)
         {
-            if (mediaPlayer.CurrentState == MediaElementState.Playing)
+            switch (mediaPlayer.CurrentState)
             {
-                PlayButtonView.Symbol = Symbol.Pause;
-
-                StoryboardR.Resume();
-            }
-            else
-            {
-                PlayButtonView.Symbol = Symbol.Play;
-                
-                StoryboardR.Pause();
+                case MediaElementState.Playing:
+                    _systemMediaTransportControls.PlaybackStatus = MediaPlaybackStatus.Playing;
+                    PlayButtonView.Symbol = Symbol.Pause;
+                    StoryboardR.Resume();
+                    break;
+                case MediaElementState.Paused:
+                    _systemMediaTransportControls.PlaybackStatus = MediaPlaybackStatus.Paused;
+                    PlayButtonView.Symbol = Symbol.Play;
+                    StoryboardR.Pause();
+                    break;
+                case MediaElementState.Stopped:
+                    _systemMediaTransportControls.PlaybackStatus = MediaPlaybackStatus.Stopped;
+                    PlayButtonView.Symbol = Symbol.Play;
+                    StoryboardR.Stop();
+                    break;
+                case MediaElementState.Closed:
+                    _systemMediaTransportControls.PlaybackStatus = MediaPlaybackStatus.Closed;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -84,8 +140,9 @@ namespace InternetApplication
             VolumeController.Value = mediaPlayer.Volume * 100;
         }
 
-        public void RefreshGUI(string Title, string Artist, BitmapImage Cover, bool isMusic)
+        public async void RefreshGUI(string Title, string Artist, BitmapImage Cover, bool isMusic, StorageFile file)
         {
+            mediaPlayer.Position = TimeSpan.FromSeconds(0);
             if (isMusic)
             {
                 TitleHolder.Text = Title;
@@ -93,6 +150,13 @@ namespace InternetApplication
                 CoverHolder.Source = Cover;
                 BGImage.ImageSource = Cover;
                 mediaPlayer.Visibility = Visibility.Collapsed;
+
+                SystemMediaTransportControlsDisplayUpdater updater = _systemMediaTransportControls.DisplayUpdater;
+
+                await updater.CopyFromFileAsync(MediaPlaybackType.Music, file);
+
+                // Update the system media transport controls
+                updater.Update();
             }
             else
             {
@@ -101,6 +165,15 @@ namespace InternetApplication
                 CoverHolder.Source = null;
                 BGImage.ImageSource = null;
                 mediaPlayer.Visibility = Visibility.Visible;
+
+                SystemMediaTransportControlsDisplayUpdater updater = _systemMediaTransportControls.DisplayUpdater;
+
+                await updater.CopyFromFileAsync(MediaPlaybackType.Video, file);
+
+                updater.VideoProperties.Title = Title;
+
+                // Update the system media transport controls
+                updater.Update();
             }
         }
 
@@ -264,6 +337,13 @@ namespace InternetApplication
                 CoverHolder.Visibility = Visibility.Visible;
                 RotateImage.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void RemoveMusic_Click(object sender, RoutedEventArgs e)
+        {
+            var index = playlist.hasMedia((sender as Button).Tag as string);
+
+            playlist.Remove(index);
         }
     }
 

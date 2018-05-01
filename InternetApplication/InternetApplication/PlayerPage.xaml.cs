@@ -53,6 +53,7 @@ namespace InternetApplication
             _systemMediaTransportControls.IsPauseEnabled = true;
             _systemMediaTransportControls.IsPreviousEnabled = true;
             _systemMediaTransportControls.IsNextEnabled = true;
+            _systemMediaTransportControls.IsStopEnabled = true;
 
             _systemMediaTransportControls.ButtonPressed += SystemControls_ButtonPressed;
             // Handle ButtonPressed Event
@@ -302,16 +303,26 @@ namespace InternetApplication
                 RepeatIcon.Symbol = Symbol.RepeatOne;
                 mediaPlayer.IsLooping = true;
             }
-            else if (RepeatIcon.Symbol == Symbol.RepeatOne) {
+            else if (RepeatIcon.Symbol == Symbol.RepeatOne)
+            {
+                RepeatIcon.Symbol = Symbol.Shuffle;
+                mediaPlayer.IsLooping = false;
+                playlist.GetList().AutoRepeatEnabled = true;
+                playlist.GetList().ShuffleEnabled = true;
+            }
+            else if (RepeatIcon.Symbol == Symbol.Shuffle)
+            {
                 RepeatIcon.Symbol = Symbol.GlobalNavigationButton;
                 mediaPlayer.IsLooping = false;
                 playlist.GetList().AutoRepeatEnabled = false;
+                playlist.GetList().ShuffleEnabled = false;
             }
             else
             {
                 RepeatIcon.Symbol = Symbol.RepeatAll;
                 playlist.GetList().AutoRepeatEnabled = true;
                 mediaPlayer.IsLooping = false;
+                playlist.GetList().ShuffleEnabled = false;
             }
         }
 

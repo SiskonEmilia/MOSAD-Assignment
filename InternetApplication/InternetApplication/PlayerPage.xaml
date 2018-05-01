@@ -100,7 +100,7 @@
                             </Button>
                             <Button Style="{x:Null}" Background="{x:Null}"  x:Name="PlayButton" Click="PlayButton_Click">
                                 <Viewbox MaxHeight="36" MaxWidth="36">
-                                    <SymbolIcon Symbol="Pause"  x:Name="PlayButtonView" />
+                                    <SymbolIcon Symbol="Play"  x:Name="PlayButtonView" />
                                 </Viewbox>
                             </Button>
                             <Button Style="{x:Null}" Background="{x:Null}"  x:Name="NextButton" Click="NextButton_Click">

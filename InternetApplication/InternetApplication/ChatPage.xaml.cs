@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.Data.Json;
 using System.Net.Http;
+using System.Threading;
 
 // https://go.microsoft.com/fwlink/?LinkId=234238 上介绍了“空白页”项模板
 
@@ -57,7 +58,7 @@ namespace InternetApplication
             }
         }
 
-        private void CheckMessage()
+        private async void CheckMessage()
         {
             switch (TypingArea.Text)
             {
@@ -79,11 +80,30 @@ namespace InternetApplication
                 case "放点音乐吧":
                     viewmodel.AddSelf(TypingArea.Text);
                     TypingArea.Text = "";
-                    viewmodel.AddEmilia("好的，那就来一首哥哥喜欢的 Dream It Possible 吧~");
+                    viewmodel.AddEmilia("好的，开启音乐播放器~");
                     (Parent as Frame).Navigate(typeof(PlayerPage), 0);
                     return;
                 default:
                     break;
+            }
+            
+
+            if (TypingArea.Text.Contains("播放"))
+            {
+                viewmodel.AddSelf(TypingArea.Text);
+                string[] parse = TypingArea.Text.Split(' ');
+                int index;
+                TypingArea.Text = "";
+                if ((index = MusicVM.GetInstance().hasMedia(parse[1])) != -1)
+                {
+                    viewmodel.AddEmilia("好的，即将为您播放 " + MusicVM.GetInstance().Musics[index].Title);
+                    (Parent as Frame).Navigate(typeof(PlayerPage), index);
+                }
+                else
+                {
+                    viewmodel.AddEmilia("没有找到您要播放的曲子，是否是您输入的格式有误？\n Tips：发送 播放 【音乐名字】 以播放音乐");
+                }
+                return;
             }
 
             string message = string.Copy(TypingArea.Text);

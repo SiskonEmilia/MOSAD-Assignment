@@ -35,14 +35,17 @@ namespace InternetApplication
         ObservableCollection<MusicPiece> Musics;
         public static PlayerPage Current;
         SystemMediaTransportControls _systemMediaTransportControls;
+        int index = -1;
 
         public PlayerPage()
         {
             this.InitializeComponent();
             Current = this;
+            mediaPlayer.AutoPlay = false;
             mediaPlayer.SetPlaybackSource(playlist.GetList());
             mediaPlayer.VolumeChanged += MediaPlayer_VolumeChanged;
             mediaPlayer.CurrentStateChanged += MediaPlayer_CurrentStateChanged;
+            mediaPlayer.MediaOpened += MediaPlayer_MediaOpened;
             Musics = playlist.GetMusics();
 
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += Dispatcher_AcceleratorKeyActivated;
@@ -57,6 +60,17 @@ namespace InternetApplication
 
             _systemMediaTransportControls.ButtonPressed += SystemControls_ButtonPressed;
             // Handle ButtonPressed Event
+        }
+
+        private void MediaPlayer_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            if (index != -1)
+            {
+                playlist.MoveTo(index);
+                mediaPlayer.Play();
+                PlayButtonView.Symbol = Symbol.Pause;
+                _systemMediaTransportControls.PlaybackStatus = MediaPlaybackStatus.Playing;
+            }
         }
 
         private async void SystemControls_ButtonPressed(SystemMediaTransportControls sender, SystemMediaTransportControlsButtonPressedEventArgs args)
@@ -119,6 +133,11 @@ namespace InternetApplication
                     StoryboardR.Resume();
                     break;
                 case MediaElementState.Paused:
+                    if (index != -1)
+                    {
+                        index = -1;
+                        break;
+                    }
                     _systemMediaTransportControls.PlaybackStatus = MediaPlaybackStatus.Paused;
                     PlayButtonView.Symbol = Symbol.Play;
                     StoryboardR.Pause();
@@ -195,6 +214,7 @@ namespace InternetApplication
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated -= Dispatcher_AcceleratorKeyActivated;
+            _systemMediaTransportControls.ButtonPressed -= SystemControls_ButtonPressed;
             base.OnNavigatedFrom(e);
         }
 
@@ -202,7 +222,7 @@ namespace InternetApplication
         {
             if (e.Parameter != null)
             {
-                mediaPlayer.Play();
+                index = (int)e.Parameter;
             }
             base.OnNavigatedTo(e);
         }
@@ -356,6 +376,8 @@ namespace InternetApplication
 
             playlist.Remove(index);
         }
+
+        
     }
 
     public class MusicProcessConverter1 : IValueConverter

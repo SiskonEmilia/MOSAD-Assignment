@@ -169,9 +169,10 @@ namespace InternetApplication
 
         public int hasMedia (string name)
         {
+            name = name.ToLower();
             for(int i = 0; i < musics.Count; ++i)
             {
-                if (musics[i].Title == name)
+                if (musics[i].Title.ToLower().Contains(name))
                 {
                     return i;
                 }

@@ -17,7 +17,7 @@
         </Storyboard>
     </Page.Resources>
 
-    <Grid Margin="0 -48 0 0">
+    <Grid Margin="0 0 0 0">
         <Grid.Background>
             <ImageBrush ImageSource="Assets/777404.jpg" x:Name="BGImage" Opacity="1" />
         </Grid.Background>

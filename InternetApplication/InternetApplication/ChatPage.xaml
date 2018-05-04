@@ -8,7 +8,7 @@
     mc:Ignorable="d">
     
     
-    <Grid Margin="0 -48 0 0 ">
+    <Grid Margin="0 0 0 0 ">
         <Grid.Background>
             <AcrylicBrush TintOpacity="0.3" TintColor="Transparent"/>
         </Grid.Background>

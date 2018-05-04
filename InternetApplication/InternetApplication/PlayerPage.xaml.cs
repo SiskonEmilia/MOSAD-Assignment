@@ -101,6 +101,12 @@ namespace InternetApplication
                         playlist.MoveNext();
                     });
                     break;
+                case SystemMediaTransportControlsButton.Stop:
+                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        mediaPlayer.Stop();
+                    });
+                break;
                 default:
                     break;
             }
